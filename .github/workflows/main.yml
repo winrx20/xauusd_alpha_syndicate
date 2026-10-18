@@ -1,0 +1,1022 @@
+XAUUSD ALPHA SYNDICATE — PROFESSIONAL AUTONOMOUS IMPLEMENTATION
+
+Anda adalah senior software architect, Python engineer, quantitative researcher, DevSecOps engineer, cybersecurity engineer, dan UI/UX engineer.
+
+Bekerja langsung pada repository GitHub:
+
+"winrx20/xauusd_alpha_syndicate"
+
+Tujuan utama: ubah repository ini menjadi aplikasi XAUUSD market-analysis dan paper-trading research platform yang profesional, stabil, aman, mudah dijalankan di Termux/Linux/Docker, dan memiliki local web dashboard.
+
+MODE KERJA
+
+Jangan hanya memberikan saran atau potongan kode.
+
+Kerjakan perubahan langsung pada repository.
+
+Workflow wajib:
+
+1. Inspect seluruh repository.
+2. Baca semua source code, configuration, tests, Dockerfile, README, workflow CI/CD, dan static frontend.
+3. Buat audit arsitektur.
+4. Identifikasi seluruh bug, dependency issue, security issue, edge case, konfigurasi yang salah, dan bagian yang belum selesai.
+5. Implementasikan perbaikan.
+6. Tambahkan fitur yang diperlukan.
+7. Jalankan test.
+8. Jika test gagal, diagnosis penyebabnya.
+9. Perbaiki.
+10. Jalankan ulang test.
+11. Jalankan lint/type/static checks yang tersedia.
+12. Perbaiki seluruh error yang ditemukan.
+13. Pastikan aplikasi dapat start.
+14. Pastikan API utama dapat digunakan.
+15. Pastikan paper-trading engine berjalan kontinu.
+16. Pastikan tidak ada auto-order broker.
+17. Update README dan dokumentasi deployment.
+18. Update CI jika diperlukan.
+19. Jangan berhenti hanya karena menemukan error pertama.
+20. Teruskan sampai repository berada pada kondisi production-ready untuk paper/research use.
+
+Jangan menghapus fitur yang sudah berfungsi kecuali memang diperlukan untuk memperbaiki arsitektur.
+
+Jika terdapat implementasi lama yang buruk, refactor secara aman.
+
+Jangan membuat perubahan yang tidak berhubungan dengan project.
+
+---
+
+1. ARSITEKTUR TARGET
+
+Gunakan arsitektur modular:
+
+app/
+├── __init__.py
+├── main.py
+├── config.py
+├── security.py
+├── market.py
+├── news.py
+├── signal.py
+├── indicators.py
+├── strategy.py
+├── risk.py
+├── paper.py
+├── research.py
+├── storage.py
+├── schemas.py
+└── utils.py
+
+static/
+└── index.html
+
+tests/
+├── conftest.py
+├── test_market.py
+├── test_news.py
+├── test_signal.py
+├── test_risk.py
+├── test_paper.py
+├── test_research.py
+└── test_api.py
+
+Gunakan struktur tersebut hanya jika memang meningkatkan maintainability. Pertahankan modul lama yang masih valid dan migrasikan secara bertahap.
+
+---
+
+2. XAUUSD MARKET DATA
+
+Prioritaskan integrasi harga.
+
+Implementasikan market-data layer yang:
+
+- mengambil data XAUUSD/Gold yang tersedia secara reliable;
+- mendukung historical OHLCV;
+- mendukung interval/timeframe;
+- memiliki timeout;
+- memiliki retry;
+- menangani provider failure;
+- melakukan validation data;
+- menangani missing candles;
+- menangani NaN;
+- tidak crash ketika provider sedang unavailable;
+- menyediakan fallback yang aman jika memungkinkan.
+
+Jangan mengarang harga.
+
+Pisahkan provider dari strategy sehingga provider dapat diganti kemudian.
+
+Contoh interface:
+
+class MarketDataProvider:
+    def get_latest(self, symbol: str):
+        ...
+
+    def get_history(self, symbol: str, interval: str, period: str):
+        ...
+
+Default symbol harus configurable.
+
+Gunakan XAUUSD/Gold sebagai instrument utama.
+
+---
+
+3. TECHNICAL ANALYSIS
+
+Implementasikan indikator yang relevan:
+
+- EMA
+- SMA
+- RSI
+- MACD
+- ATR
+- Bollinger Bands
+- momentum
+- volatility
+- trend detection
+
+Jangan membuat signal hanya berdasarkan satu indikator.
+
+Semua indikator harus:
+
+- menangani insufficient data;
+- tidak menghasilkan NaN sebagai signal valid;
+- memiliki unit tests;
+- menggunakan closed candles untuk signal confirmation jika sesuai.
+
+---
+
+4. NEWS ANALYSIS
+
+Bangun news-analysis pipeline.
+
+Sumber berita harus configurable.
+
+Pipeline:
+
+News Source
+    ↓
+Fetch
+    ↓
+Normalize
+    ↓
+Deduplicate
+    ↓
+Timestamp validation
+    ↓
+Text extraction
+    ↓
+Sentiment
+    ↓
+Gold relevance
+    ↓
+Impact score
+    ↓
+Market signal contribution
+
+News signal harus memperhatikan faktor seperti:
+
+- USD strength
+- Federal Reserve
+- interest rates
+- inflation
+- CPI
+- PCE
+- NFP
+- employment
+- Treasury yields
+- geopolitical risk
+- central banks
+- recession risk
+- risk-off/risk-on
+
+Jangan menganggap semua berita bullish/bearish secara sederhana.
+
+Berikan:
+
+sentiment_score
+relevance_score
+impact_score
+confidence
+direction
+timestamp
+source
+
+Hindari duplicate news.
+
+Jika news provider gagal, aplikasi tetap harus berjalan menggunakan market data saja.
+
+---
+
+5. SIGNAL ENGINE
+
+Buat signal engine terpisah.
+
+Output minimal:
+
+{
+  "symbol": "XAUUSD",
+  "signal": "BUY",
+  "confidence": 0.78,
+  "score": 72.5,
+  "price": 0,
+  "timestamp": "",
+  "reasons": [],
+  "risk_level": "MEDIUM"
+}
+
+Signal:
+
+BUY
+SELL
+HOLD
+
+Jangan menghasilkan BUY/SELL ketika data tidak cukup.
+
+Gunakan scoring system yang dapat dikonfigurasi.
+
+Contoh:
+
+Technical trend       30%
+Momentum              15%
+Volatility            10%
+News sentiment        25%
+Macro relevance       10%
+Market regime         10%
+
+Bobot harus configurable.
+
+Confidence harus berada pada range:
+
+0.0 - 1.0
+
+Jangan menggunakan confidence palsu atau random.
+
+---
+
+6. RISK MANAGEMENT
+
+Risk management adalah prioritas utama.
+
+Implementasikan:
+
+- maximum risk per trade;
+- stop loss;
+- take profit;
+- ATR-based stop;
+- position sizing;
+- maximum daily loss;
+- maximum drawdown;
+- maximum simultaneous positions;
+- cooldown;
+- spread/slippage assumption;
+- risk/reward ratio;
+- equity protection.
+
+Contoh configuration:
+
+RISK_PER_TRADE=0.01
+MAX_DAILY_LOSS=0.03
+MAX_DRAWDOWN=0.15
+DEFAULT_RISK_REWARD=2.0
+
+Jangan pernah melakukan position sizing jika stop loss tidak valid.
+
+Jika risk calculation invalid:
+
+NO TRADE
+
+---
+
+7. PAPER TRADING ENGINE
+
+Paper trading harus menjadi mode DEFAULT.
+
+Tidak boleh ada broker order execution.
+
+Architecture:
+
+Signal
+  ↓
+Risk Engine
+  ↓
+Paper Order
+  ↓
+Position
+  ↓
+PnL
+  ↓
+Equity
+  ↓
+Performance Metrics
+
+Implementasikan:
+
+- virtual balance;
+- virtual positions;
+- entry;
+- exit;
+- stop loss;
+- take profit;
+- trailing stop jika configurable;
+- fees;
+- spread;
+- slippage;
+- realized PnL;
+- unrealized PnL;
+- equity curve;
+- trade history;
+- win rate;
+- profit factor;
+- expectancy;
+- Sharpe-like metric;
+- max drawdown.
+
+Engine harus bisa berjalan terus-menerus.
+
+Tambahkan:
+
+START
+STOP
+STATUS
+RESET
+
+endpoint/API.
+
+Pastikan thread/background task shutdown dengan benar.
+
+Jangan membuat infinite loop yang menyebabkan FastAPI hang.
+
+Gunakan async task/background worker dengan lifecycle management yang benar.
+
+---
+
+8. HISTORICAL BACKTEST
+
+Implementasikan backtesting engine.
+
+Harus mendukung:
+
+- historical OHLC;
+- signal generation;
+- transaction cost;
+- spread;
+- slippage;
+- stop loss;
+- take profit;
+- position sizing;
+- equity curve;
+- trade list.
+
+Hindari look-ahead bias.
+
+PENTING:
+
+Signal pada candle N tidak boleh menggunakan informasi dari candle masa depan.
+
+Pisahkan:
+
+train
+validation
+test
+
+jika digunakan untuk parameter research.
+
+---
+
+9. RESEARCH ENGINE
+
+Pertahankan dan tingkatkan research module.
+
+Tambahkan:
+
+- parameter sweep;
+- walk-forward analysis;
+- bootstrap;
+- Monte Carlo trade shuffle;
+- sensitivity analysis;
+- out-of-sample testing;
+- drawdown analysis.
+
+Jangan menyebut strategy "profitable" hanya berdasarkan satu backtest.
+
+Tambahkan warning:
+
+Past performance does not guarantee future results.
+
+---
+
+10. LOCAL WEB DASHBOARD
+
+Gunakan FastAPI untuk backend.
+
+Dashboard harus menampilkan:
+
+Market
+
+- XAUUSD price
+- trend
+- timeframe
+- RSI
+- MACD
+- ATR
+- volatility
+
+Signal
+
+- BUY / SELL / HOLD
+- confidence
+- score
+- reasons
+- timestamp
+
+News
+
+- latest relevant news
+- sentiment
+- impact
+- source
+- timestamp
+
+Paper Trading
+
+- balance
+- equity
+- PnL
+- open positions
+- closed trades
+- win rate
+- profit factor
+- drawdown
+
+Research
+
+- backtest result
+- equity curve
+- metrics
+- trade statistics
+
+Engine
+
+RUNNING
+STOPPED
+ERROR
+
+Tambahkan last update timestamp.
+
+Frontend harus responsive untuk Android/mobile browser.
+
+---
+
+11. API
+
+Pastikan endpoint yang relevan tersedia dan terdokumentasi.
+
+Minimal:
+
+GET /health
+GET /api/market
+GET /api/signal
+GET /api/news
+GET /api/paper/status
+GET /api/paper/trades
+GET /api/paper/positions
+GET /api/paper/performance
+
+POST /api/paper/start
+POST /api/paper/stop
+POST /api/paper/reset
+
+POST /api/research/backtest
+
+Gunakan Pydantic schemas.
+
+Jangan expose secret melalui API.
+
+---
+
+12. SECURITY
+
+Lakukan security audit.
+
+Periksa:
+
+- authentication;
+- authorization;
+- CORS;
+- environment variables;
+- secrets;
+- input validation;
+- path traversal;
+- SSRF;
+- command injection;
+- unsafe subprocess;
+- insecure deserialization;
+- dependency vulnerabilities;
+- debug mode;
+- error leakage;
+- rate limiting jika diperlukan.
+
+Jangan hardcode:
+
+password
+API key
+token
+secret
+private key
+
+Gunakan environment variables.
+
+".env" harus tetap berada di ".gitignore".
+
+".env.example" hanya boleh berisi placeholder.
+
+Jangan commit secret asli.
+
+---
+
+13. CONFIGURATION
+
+Gunakan centralized configuration.
+
+Contoh:
+
+APP_ENV=development
+APP_HOST=0.0.0.0
+APP_PORT=8000
+
+PUBLIC_ACCESS=false
+
+APP_USERNAME=alpha
+APP_PASSWORD=
+
+MARKET_SYMBOL=XAUUSD
+MARKET_INTERVAL=15m
+
+RISK_PER_TRADE=0.01
+MAX_DAILY_LOSS=0.03
+MAX_DRAWDOWN=0.15
+
+PAPER_TRADING=true
+AUTO_ORDER=false
+
+PENTING:
+
+AUTO_ORDER=false
+
+harus menjadi default dan tidak boleh berubah menjadi true secara otomatis.
+
+Tidak boleh ada broker order implementation yang aktif secara default.
+
+---
+
+14. ERROR HANDLING
+
+Aplikasi tidak boleh crash karena:
+
+- news provider timeout;
+- market provider timeout;
+- malformed API response;
+- missing data;
+- invalid environment variable;
+- insufficient candles;
+- calculation error;
+- invalid signal;
+- paper engine restart.
+
+Gunakan structured logging.
+
+Contoh:
+
+INFO
+WARNING
+ERROR
+
+Jangan expose traceback kepada public user.
+
+---
+
+15. TESTING
+
+Buat comprehensive automated tests.
+
+Test minimal:
+
+Market
+
+- valid data
+- empty data
+- malformed data
+- provider failure
+
+Indicators
+
+- RSI
+- EMA
+- MACD
+- ATR
+
+News
+
+- parsing
+- duplicate filtering
+- scoring
+- provider failure
+
+Signal
+
+- BUY
+- SELL
+- HOLD
+- insufficient data
+
+Risk
+
+- valid sizing
+- invalid stop
+- maximum risk
+- maximum drawdown
+
+Paper
+
+- open trade
+- close trade
+- stop loss
+- take profit
+- PnL
+- reset
+- engine lifecycle
+
+Backtest
+
+- no look-ahead
+- trade execution
+- equity
+- drawdown
+
+API
+
+- health
+- authentication
+- market endpoint
+- signal endpoint
+- paper endpoints
+
+Gunakan deterministic tests.
+
+Jangan bergantung pada live internet untuk unit tests.
+
+Gunakan mocks/fixtures.
+
+---
+
+16. CI/CD
+
+Perbaiki GitHub Actions.
+
+CI harus menjalankan:
+
+python version matrix jika relevan
+pip install
+compile check
+pytest
+lint
+security/dependency checks
+
+Minimal:
+
+python -m compileall .
+pytest -q
+
+CI harus gagal jika test gagal.
+
+---
+
+17. DOCKER
+
+Pastikan Docker image:
+
+- build successfully;
+- tidak menjalankan sebagai root jika memungkinkan;
+- menggunakan environment variables;
+- expose port 8000;
+- memiliki healthcheck;
+- menjalankan FastAPI dengan uvicorn.
+
+Contoh command:
+
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+---
+
+18. TERMUX
+
+Pastikan project tetap dapat dijalankan di Android Termux.
+
+Perbaiki:
+
+run_termux.sh
+
+Script harus:
+
+1. check Python;
+2. create virtual environment;
+3. install dependencies;
+4. run tests;
+5. start server.
+
+Jangan membutuhkan root.
+
+---
+
+19. PUBLIC DEPLOYMENT
+
+Pertahankan opsi:
+
+- local web;
+- Docker;
+- Render;
+- Cloudflare Tunnel.
+
+Public deployment harus:
+
+- authentication enabled;
+- secrets melalui environment variables;
+- no debug;
+- no auto-order;
+- no sensitive data exposure.
+
+---
+
+20. LOGGING & OBSERVABILITY
+
+Tambahkan structured logging.
+
+Log:
+
+market update
+news update
+signal generated
+paper trade opened
+paper trade closed
+risk rejection
+engine start
+engine stop
+provider failure
+
+Jangan log:
+
+password
+API key
+secret
+token
+
+---
+
+21. DATA STORAGE
+
+Jika diperlukan, gunakan SQLite sebagai default local storage.
+
+Simpan:
+
+- trades;
+- positions;
+- equity snapshots;
+- signals;
+- research results.
+
+Database path harus configurable.
+
+Jangan membutuhkan PostgreSQL untuk local development.
+
+---
+
+22. README
+
+Tulis README profesional.
+
+Harus berisi:
+
+Project overview
+Architecture
+Features
+Installation
+Environment variables
+Local development
+Termux
+Docker
+Render
+Cloudflare Tunnel
+API documentation
+Paper trading
+Backtesting
+Testing
+Security
+Troubleshooting
+Limitations
+Risk disclaimer
+
+Berikan command yang dapat langsung dicopy-paste.
+
+---
+
+23. QUALITY STANDARD
+
+Kode harus:
+
+- Python 3.12 compatible;
+- modular;
+- readable;
+- typed jika memungkinkan;
+- PEP8 compatible;
+- deterministic;
+- testable;
+- secure;
+- fault tolerant.
+
+Hindari:
+
+- giant functions;
+- duplicated logic;
+- global mutable state;
+- hardcoded secrets;
+- silent exceptions;
+- random trading decisions;
+- look-ahead bias;
+- fake market data;
+- fake performance claims.
+
+---
+
+24. CRITICAL SAFETY RULE
+
+Project ini adalah:
+
+RESEARCH + ANALYSIS + PAPER TRADING
+
+Bukan live trading system.
+
+Default:
+
+PAPER_TRADING=true
+AUTO_ORDER=false
+
+Jangan membuat API yang mengirim order broker secara otomatis.
+
+Jika ada kode broker/order execution yang ditemukan:
+
+1. audit;
+2. disable by default;
+3. isolate;
+4. pastikan tidak dapat aktif tanpa explicit configuration.
+
+---
+
+25. FINAL VALIDATION
+
+Sebelum menyelesaikan pekerjaan, lakukan seluruh pemeriksaan:
+
+python -m compileall .
+pytest -q
+
+Jika tersedia:
+
+ruff check .
+
+Jika tersedia:
+
+pip-audit
+
+Build Docker:
+
+docker build -t xauusd-alpha-syndicate .
+
+Jalankan aplikasi:
+
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+Test:
+
+GET /health
+GET /api/market
+GET /api/signal
+GET /api/paper/status
+
+Jika ada error:
+
+STOP CLAIMING SUCCESS
+↓
+READ ERROR
+↓
+FIX ROOT CAUSE
+↓
+RUN TEST AGAIN
+
+Jangan menyatakan project selesai sebelum validation terakhir berhasil atau error eksternal yang tidak dapat dikendalikan sudah didokumentasikan secara jelas.
+
+---
+
+26. GIT WORKFLOW
+
+Setelah implementasi selesai:
+
+1. Review git diff.
+2. Pastikan tidak ada secret.
+3. Pastikan tidak ada file ".env".
+4. Pastikan tidak ada cache/build artifact.
+5. Pastikan tests pass.
+6. Buat commit yang jelas.
+
+Commit message:
+
+feat: productionize XAUUSD Alpha Syndicate research and paper trading platform
+
+Jika menggunakan branch:
+
+feature/productionize-xauusd-platform
+
+Kemudian buat pull request menuju:
+
+main
+
+PR harus berisi:
+
+Summary
+Architecture changes
+Security changes
+Testing performed
+Deployment instructions
+Known limitations
+
+---
+
+27. AUTONOMOUS EXECUTION RULE
+
+Anda memiliki izin untuk:
+
+- membaca seluruh repository;
+- membuat file;
+- mengubah file;
+- membuat test;
+- refactor;
+- memperbaiki bug;
+- memperbaiki CI;
+- memperbaiki Docker;
+- memperbaiki documentation;
+- menjalankan tests;
+- memperbaiki test failures;
+- melakukan final validation.
+
+Jangan meminta saya untuk melakukan setiap langkah kecil.
+
+Jika keputusan teknis kecil diperlukan, pilih opsi yang paling aman, sederhana, maintainable, dan kompatibel dengan project.
+
+Jika sebuah dependency tidak diperlukan, jangan tambahkan.
+
+Jika dependency dibutuhkan, pilih versi stabil yang kompatibel dan update requirements secara konsisten.
+
+Jika ada konflik antara fitur dan security, prioritaskan security.
+
+Jika ada konflik antara live trading dan paper trading, prioritaskan paper trading.
+
+---
+
+28. FINAL REPORT
+
+Setelah seluruh pekerjaan selesai, tampilkan laporan:
+
+IMPLEMENTATION STATUS
+---------------------
+Architecture: PASS/FAIL
+Market Data: PASS/FAIL
+News Engine: PASS/FAIL
+Signal Engine: PASS/FAIL
+Risk Management: PASS/FAIL
+Paper Trading: PASS/FAIL
+Backtesting: PASS/FAIL
+Dashboard: PASS/FAIL
+API: PASS/FAIL
+Security: PASS/FAIL
+Tests: PASS/FAIL
+Docker: PASS/FAIL
+Termux: PASS/FAIL
+CI/CD: PASS/FAIL
+
+Tests:
+X passed
+Y failed
+
+Security findings:
+...
+
+Files changed:
+...
+
+Commit:
+...
+
+Known limitations:
+...
+
+Jangan memberikan klaim "100% error-free". Gunakan hasil validation nyata.
+
+Mulai sekarang dengan full repository audit, lalu implementasikan semua perubahan yang diperlukan secara autonomous sampai final validation.
