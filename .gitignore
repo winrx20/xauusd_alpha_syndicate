@@ -1,0 +1,17 @@
+# Ignore environment files and Python artifacts
+.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+dist/
+build/
+.idea/
+.vscode/
+.DS_Store
+
+# Docker
+**/venv
+

@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>XAUUSD Alpha Syndicate</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:16px}
+    .card{border:1px solid #eee;padding:12px;margin-bottom:12px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <h1>XAUUSD Alpha Syndicate</h1>
+  <div id="app">
+    <div class="card"><strong>API</strong><div>/health /api/market /api/signal /api/paper/*</div></div>
+    <div class="card"><strong>Status</strong><div id="status">Loading...</div></div>
+  </div>
+  <script>
+    async function load(){
+      try{
+        const r=await fetch('/api/paper/status');
+        const j=await r.json();
+        document.getElementById('status').innerText=JSON.stringify(j,null,2);
+      }catch(e){document.getElementById('status').innerText='error';}
+    }
+    load();
+  </script>
+</body>
+</html>
