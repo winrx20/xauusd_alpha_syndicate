@@ -1,0 +1,400 @@
+e
+
+Signal
+
+- BUY
+- SELL
+- HOLD
+- insufficient data
+
+Risk
+
+- valid sizing
+- invalid stop
+- maximum risk
+- maximum drawdown
+
+Paper
+
+- open trade
+- close trade
+- stop loss
+- take profit
+- PnL
+- reset
+- engine lifecycle
+
+Backtest
+
+- no look-ahead
+- trade execution
+- equity
+- drawdown
+
+API
+
+- health
+- authentication
+- market endpoint
+- signal endpoint
+- paper endpoints
+
+Gunakan deterministic tests.
+
+Jangan bergantung pada live internet untuk unit tests.
+
+Gunakan mocks/fixtures.
+
+---
+
+16. CI/CD
+
+Perbaiki GitHub Actions.
+
+CI harus menjalankan:
+
+python version matrix jika relevan
+pip install
+compile check
+pytest
+lint
+security/dependency checks
+
+Minimal:
+
+python -m compileall .
+pytest -q
+
+CI harus gagal jika test gagal.
+
+---
+
+17. DOCKER
+
+Pastikan Docker image:
+
+- build successfully;
+- tidak menjalankan sebagai root jika memungkinkan;
+- menggunakan environment variables;
+- expose port 8000;
+- memiliki healthcheck;
+- menjalankan FastAPI dengan uvicorn.
+
+Contoh command:
+
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+---
+
+18. TERMUX
+
+Pastikan project tetap dapat dijalankan di Android Termux.
+
+Perbaiki:
+
+run_termux.sh
+
+Script harus:
+
+1. check Python;
+2. create virtual environment;
+3. install dependencies;
+4. run tests;
+5. start server.
+
+Jangan membutuhkan root.
+
+---
+
+19. PUBLIC DEPLOYMENT
+
+Pertahankan opsi:
+
+- local web;
+- Docker;
+- Render;
+- Cloudflare Tunnel.
+
+Public deployment harus:
+
+- authentication enabled;
+- secrets melalui environment variables;
+- no debug;
+- no auto-order;
+- no sensitive data exposure.
+
+---
+
+20. LOGGING & OBSERVABILITY
+
+Tambahkan structured logging.
+
+Log:
+
+market update
+news update
+signal generated
+paper trade opened
+paper trade closed
+risk rejection
+engine start
+engine stop
+provider failure
+
+Jangan log:
+
+password
+API key
+secret
+token
+
+---
+
+21. DATA STORAGE
+
+Jika diperlukan, gunakan SQLite sebagai default local storage.
+
+Simpan:
+
+- trades;
+- positions;
+- equity snapshots;
+- signals;
+- research results.
+
+Database path harus configurable.
+
+Jangan membutuhkan PostgreSQL untuk local development.
+
+---
+
+22. README
+
+Tulis README profesional.
+
+Harus berisi:
+
+Project overview
+Architecture
+Features
+Installation
+Environment variables
+Local development
+Termux
+Docker
+Render
+Cloudflare Tunnel
+API documentation
+Paper trading
+Backtesting
+Testing
+Security
+Troubleshooting
+Limitations
+Risk disclaimer
+
+Berikan command yang dapat langsung dicopy-paste.
+
+---
+
+23. QUALITY STANDARD
+
+Kode harus:
+
+- Python 3.12 compatible;
+- modular;
+- readable;
+- typed jika memungkinkan;
+- PEP8 compatible;
+- deterministic;
+- testable;
+- secure;
+- fault tolerant.
+
+Hindari:
+
+- giant functions;
+- duplicated logic;
+- global mutable state;
+- hardcoded secrets;
+- silent exceptions;
+- random trading decisions;
+- look-ahead bias;
+- fake market data;
+- fake performance claims.
+
+---
+
+24. CRITICAL SAFETY RULE
+
+Project ini adalah:
+
+RESEARCH + ANALYSIS + PAPER TRADING
+
+Bukan live trading system.
+
+Default:
+
+PAPER_TRADING=true
+AUTO_ORDER=false
+
+Jangan membuat API yang mengirim order broker secara otomatis.
+
+Jika ada kode broker/order execution yang ditemukan:
+
+1. audit;
+2. disable by default;
+3. isolate;
+4. pastikan tidak dapat aktif tanpa explicit configuration.
+
+---
+
+25. FINAL VALIDATION
+
+Sebelum menyelesaikan pekerjaan, lakukan seluruh pemeriksaan:
+
+python -m compileall .
+pytest -q
+
+Jika tersedia:
+
+ruff check .
+
+Jika tersedia:
+
+pip-audit
+
+Build Docker:
+
+docker build -t xauusd-alpha-syndicate .
+
+Jalankan aplikasi:
+
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+Test:
+
+GET /health
+GET /api/market
+GET /api/signal
+GET /api/paper/status
+
+Jika ada error:
+
+STOP CLAIMING SUCCESS
+↓
+READ ERROR
+↓
+FIX ROOT CAUSE
+↓
+RUN TEST AGAIN
+
+Jangan menyatakan project selesai sebelum validation terakhir berhasil atau error eksternal yang tidak dapat dikendalikan sudah didokumentasikan secara jelas.
+
+---
+
+26. GIT WORKFLOW
+
+Setelah implementasi selesai:
+
+1. Review git diff.
+2. Pastikan tidak ada secret.
+3. Pastikan tidak ada file ".env".
+4. Pastikan tidak ada cache/build artifact.
+5. Pastikan tests pass.
+6. Buat commit yang jelas.
+
+Commit message:
+
+feat: productionize XAUUSD Alpha Syndicate research and paper trading platform
+
+Jika menggunakan branch:
+
+feature/productionize-xauusd-platform
+
+Kemudian buat pull request menuju:
+
+main
+
+PR harus berisi:
+
+Summary
+Architecture changes
+Security changes
+Testing performed
+Deployment instructions
+Known limitations
+
+---
+
+27. AUTONOMOUS EXECUTION RULE
+
+Anda memiliki izin untuk:
+
+- membaca seluruh repository;
+- membuat file;
+- mengubah file;
+- membuat test;
+- refactor;
+- memperbaiki bug;
+- memperbaiki CI;
+- memperbaiki Docker;
+- memperbaiki documentation;
+- menjalankan tests;
+- memperbaiki test failures;
+- melakukan final validation.
+
+Jangan meminta saya untuk melakukan setiap langkah kecil.
+
+Jika keputusan teknis kecil diperlukan, pilih opsi yang paling aman, sederhana, maintainable, dan kompatibel dengan project.
+
+Jika sebuah dependency tidak diperlukan, jangan tambahkan.
+
+Jika dependency dibutuhkan, pilih versi stabil yang kompatibel dan update requirements secara konsisten.
+
+Jika ada konflik antara fitur dan security, prioritaskan security.
+
+Jika ada konflik antara live trading dan paper trading, prioritaskan paper trading.
+
+---
+
+28. FINAL REPORT
+
+Setelah seluruh pekerjaan selesai, tampilkan laporan:
+
+IMPLEMENTATION STATUS
+---------------------
+Architecture: PASS/FAIL
+Market Data: PASS/FAIL
+News Engine: PASS/FAIL
+Signal Engine: PASS/FAIL
+Risk Management: PASS/FAIL
+Paper Trading: PASS/FAIL
+Backtesting: PASS/FAIL
+Dashboard: PASS/FAIL
+API: PASS/FAIL
+Security: PASS/FAIL
+Tests: PASS/FAIL
+Docker: PASS/FAIL
+Termux: PASS/FAIL
+CI/CD: PASS/FAIL
+
+Tests:
+X passed
+Y failed
+
+Security findings:
+...
+
+Files changed:
+...
+
+Commit:
+...
+
+Known limitations:
+...
+
+Jangan memberikan klaim "100% error-free". Gunakan hasil validation nyata.
+
+Mulai sekarang dengan full repository audit, lalu implementasikan semua perubahan yang diperlukan secara autonomous sampai final validation.
